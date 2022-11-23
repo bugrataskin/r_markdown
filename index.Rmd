@@ -1,0 +1,105 @@
+---
+title: "Distrubution and Scatterplot Analysis"
+author: "Bugra"
+date: "23/11/2022"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+```
+```{r installing packages, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+library("tidyverse")
+library(ggplot2)
+library(ggpubr)
+library(readr)
+```
+
+```{r getting data set, include=FALSE}
+library(readr)
+My_UBER_Data_v3 <- read_csv("C:/Users/bugra/OneDrive/Portfolio/uber/My_UBER_Data_v3.csv")
+View(My_UBER_Data_v3)
+
+uberdata<-My_UBER_Data_v3
+view(uberdata)
+```
+
+## Distributions
+
+This analysis shows the raw and normalised distribution of base earning, driven distance and delivery time for each delivery run. 
+
+```{r descriptive analysis}
+summary(uberdata[c('delivery_base_earning','distance','delivery_time_min')])
+
+```
+```{r whisker analysis}
+# Data Preparation
+
+dis<-uberdata$distance
+time<-uberdata$delivery_time_min
+earn<-uberdata$delivery_base_earning
+  
+# Normal Distribution
+dis_norm <- rnorm(1300,mean = mean(dis,na.rm = TRUE), sd=sd(dis,na.rm = TRUE))
+time_norm <- rnorm(1300,mean = mean(time,na.rm = TRUE), sd=sd(time,na.rm = TRUE))
+earn_norm <- rnorm(1300,mean = mean(earn,na.rm = TRUE), sd=sd(earn,na.rm = TRUE))
+
+#Visualisation
+
+boxplot(dis, dis_norm, time, time_norm, earn, earn_norm,
+main = "Multiple boxplots for comparision",
+at = c(1,2,3,4,5,6),
+names = c("distance", "normal", "time", "normal", "earning", "normal"),
+las = 2,
+col = c("blue","yellow"),
+border = "brown",
+horizontal = TRUE,
+notch = TRUE)
+```
+
+
+Regarding the raw distribution it can be seen that each variable has a positively skewed distribution. As we normalize them, there is a negligible movement in quartiles, therefore we can proceed with the raw distribution.
+
+
+## Distance vs. Earning Comparison
+
+This analysis compares two major variables, where driven distance acts as an independent variable to base earnings.
+
+```{r scatterplot analysis for distance}
+ggplot(uberdata,aes(x= distance, y=delivery_base_earning))+
+    geom_point(color = "Purple")+
+    geom_smooth(method=lm)+
+    stat_cor(method = "pearson")+
+    labs(title ="Distance vs. Base Earnings")
+
+```
+
+Regarding the r and p value we may say there is a significant positive strong correlation between two variables. But as we look at the R^2( 0.536), this correlation can only explain the 54% of the change in base earnings, which is a moderate level in model fitness.
+
+
+## Delivery duration vs. Earning Comparison
+
+This analysis compares other two major variables, where delivery duration acts as an independent variable to base earnings.
+
+```{r pressure, echo=TRUE}
+  ggplot(uberdata,aes(x= delivery_time_min, y=delivery_base_earning)) +
+  geom_point(color = "Blue")+
+  geom_smooth(method=lm, color = "Orange")+
+  stat_cor(method = "pearson")+
+  labs(title ="Delivery Time vs. Base Earnings")
+
+```
+
+
+Compared to distance, driving time for each delivery run has a more significant effect on base earnings, regarding the r and p values.There is a significant positive very strong correlation among them. Moreover, we can explain 78% (R^2) of the change in earning via time, that is a strong fitness level.
+
+## Conclusion
+
+Both variables, distance and time, have a significant positive correlation with base earning, which means as you drive longer in distance and time, it's most likely to earn more money per delivery run. But despite the strong correlation, it can be deduced that time's effect on earning is more explainable. It's most likely to earn more as you spend more time on a single delivery rather than drive for more distance. 
+
